@@ -1,1 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Flask Backend + Frontend</h1>
+        
+        <section>
+            <h2>API Test</h2>
+            <button onclick="fetchData()">Get Data</button>
+            <button onclick="sendData()">Send Data</button>
+            <div id="result"></div>
+        </section>
 
+        <section>
+            <h2>Item Manager</h2>
+            <input type="text" id="itemInput" placeholder="Enter item text">
+            <button onclick="addItem()">Add Item</button>
+            <button onclick="loadItems()">Refresh</button>
+            <button onclick="clearAll()">Clear All</button>
+            <div id="items"></div>
+        </section>
+
+        <section>
+            <h2>User Registration</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="email" id="email" placeholder="Email">
+            <button onclick="registerUser()">Register</button>
+            <div id="userResult"></div>
+        </section>
+
+        <section>
+            <h2>Statistics</h2>
+            <button onclick="getStats()">Get Stats</button>
+            <div id="stats"></div>
+        </section>
+
+        <section>
+            <h2>File Upload</h2>
+            <input type="file" id="fileInput">
+            <button onclick="uploadFile()">Upload</button>
+            <div id="uploadResult"></div>
+        </section>
+
+        <section>
+            <h2>Search</h2>
+            <input type="text" id="searchInput" placeholder="Search items">
+            <button onclick="searchItems()">Search</button>
+            <select id="sortOrder">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="alpha">Alphabetical</option>
+            </select>
+            <button onclick="sortItems()">Sort</button>
+            <div id="searchResults"></div>
+        </section>
+
+        <section>
+            <h2>Todo List</h2>
+            <input type="text" id="todoInput" placeholder="Add todo">
+            <select id="todoPriority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+            <button onclick="addTodo()">Add Todo</button>
+            <div id="todos"></div>
+        </section>
+
+        <section>
+            <h2>Notes</h2>
+            <input type="text" id="noteTitle" placeholder="Title">
+            <textarea id="noteContent" placeholder="Content" rows="4"></textarea>
+            <button onclick="saveNote()">Save Note</button>
+            <button onclick="loadNotes()">Load Notes</button>
+            <button onclick="exportData()">Export All Data</button>
+            <div id="notes"></div>
+        </section>
+
+        <section>
+            <h2>Filter Todos</h2>
+            <select id="filterStatus" onchange="filterTodos()">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+            </select>
+            <select id="filterPriority" onchange="filterTodos()">
+                <option value="all">All Priorities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+        </section>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
