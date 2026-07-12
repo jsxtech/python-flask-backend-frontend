@@ -1,100 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
+    <main class="container">
         <h1>Flask Backend + Frontend</h1>
-        
-        <section>
-            <h2>API Test</h2>
+
+        <section aria-labelledby="api-test-heading">
+            <h2 id="api-test-heading">API Test</h2>
             <button onclick="fetchData()">Get Data</button>
             <button onclick="sendData()">Send Data</button>
-            <div id="result"></div>
+            <pre id="result" role="status" aria-live="polite"></pre>
         </section>
 
-        <section>
-            <h2>Item Manager</h2>
-            <input type="text" id="itemInput" placeholder="Enter item text">
+        <section aria-labelledby="item-manager-heading">
+            <h2 id="item-manager-heading">Item Manager</h2>
+            <div class="form-group">
+                <label for="itemInput">Item text</label>
+                <input type="text" id="itemInput" placeholder="Enter item text" maxlength="500" aria-describedby="itemHelp">
+                <small id="itemHelp" class="sr-only">Maximum 500 characters</small>
+            </div>
             <button onclick="addItem()">Add Item</button>
             <button onclick="loadItems()">Refresh</button>
             <button onclick="clearAll()">Clear All</button>
-            <div id="items"></div>
+            <div id="items" role="list" aria-live="polite"></div>
         </section>
 
-        <section>
-            <h2>User Registration</h2>
-            <input type="text" id="username" placeholder="Username">
-            <input type="email" id="email" placeholder="Email">
-            <button onclick="registerUser()">Register</button>
-            <div id="userResult"></div>
-        </section>
-
-        <section>
-            <h2>Statistics</h2>
-            <button onclick="getStats()">Get Stats</button>
-            <div id="stats"></div>
-        </section>
-
-        <section>
-            <h2>File Upload</h2>
-            <input type="file" id="fileInput">
-            <button onclick="uploadFile()">Upload</button>
-            <div id="uploadResult"></div>
-        </section>
-
-        <section>
-            <h2>Search</h2>
-            <input type="text" id="searchInput" placeholder="Search items">
+        <section aria-labelledby="search-heading">
+            <h2 id="search-heading">Search &amp; Sort</h2>
+            <div class="form-group">
+                <label for="searchInput">Search query</label>
+                <input type="text" id="searchInput" placeholder="Search items">
+            </div>
             <button onclick="searchItems()">Search</button>
-            <select id="sortOrder">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="alpha">Alphabetical</option>
-            </select>
+            <div class="form-group">
+                <label for="sortOrder">Sort order</label>
+                <select id="sortOrder">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="alpha">Alphabetical</option>
+                </select>
+            </div>
             <button onclick="sortItems()">Sort</button>
-            <div id="searchResults"></div>
+            <div id="searchResults" role="status" aria-live="polite"></div>
         </section>
 
-        <section>
-            <h2>Todo List</h2>
-            <input type="text" id="todoInput" placeholder="Add todo">
-            <select id="todoPriority">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-            </select>
+        <section aria-labelledby="todo-heading">
+            <h2 id="todo-heading">Todo List</h2>
+            <div class="form-group">
+                <label for="todoInput">Todo text</label>
+                <input type="text" id="todoInput" placeholder="Add todo" maxlength="500">
+            </div>
+            <div class="form-group">
+                <label for="todoPriority">Priority</label>
+                <select id="todoPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
             <button onclick="addTodo()">Add Todo</button>
-            <div id="todos"></div>
+
+            <div class="filter-controls">
+                <div class="form-group">
+                    <label for="filterStatus">Filter by status</label>
+                    <select id="filterStatus" onchange="filterTodos()">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filterPriority">Filter by priority</label>
+                    <select id="filterPriority" onchange="filterTodos()">
+                        <option value="all">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="todos" role="list" aria-live="polite"></div>
         </section>
 
-        <section>
-            <h2>Notes</h2>
-            <input type="text" id="noteTitle" placeholder="Title">
-            <textarea id="noteContent" placeholder="Content" rows="4"></textarea>
+        <section aria-labelledby="notes-heading">
+            <h2 id="notes-heading">Notes</h2>
+            <div class="form-group">
+                <label for="noteTitle">Note title</label>
+                <input type="text" id="noteTitle" placeholder="Title" maxlength="200">
+            </div>
+            <div class="form-group">
+                <label for="noteContent">Note content</label>
+                <textarea id="noteContent" placeholder="Content" rows="4" maxlength="5000"></textarea>
+            </div>
             <button onclick="saveNote()">Save Note</button>
             <button onclick="loadNotes()">Load Notes</button>
             <button onclick="exportData()">Export All Data</button>
-            <div id="notes"></div>
+            <div id="notes" role="list" aria-live="polite"></div>
         </section>
 
-        <section>
-            <h2>Filter Todos</h2>
-            <select id="filterStatus" onchange="filterTodos()">
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
-            </select>
-            <select id="filterPriority" onchange="filterTodos()">
-                <option value="all">All Priorities</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-            </select>
+        <section aria-labelledby="user-reg-heading">
+            <h2 id="user-reg-heading">User Registration</h2>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Username" maxlength="100" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <button onclick="registerUser()">Register</button>
+            <pre id="userResult" role="status" aria-live="polite"></pre>
         </section>
-    </div>
+
+        <section aria-labelledby="stats-heading">
+            <h2 id="stats-heading">Statistics</h2>
+            <button onclick="getStats()">Get Stats</button>
+            <div id="stats" role="status" aria-live="polite"></div>
+        </section>
+
+        <section aria-labelledby="upload-heading">
+            <h2 id="upload-heading">File Upload</h2>
+            <div class="form-group">
+                <label for="fileInput">Choose file</label>
+                <input type="file" id="fileInput" accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.doc,.docx">
+            </div>
+            <button onclick="uploadFile()">Upload</button>
+            <pre id="uploadResult" role="status" aria-live="polite"></pre>
+        </section>
+    </main>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
