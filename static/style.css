@@ -11,7 +11,7 @@ body {
     background: white;
     padding: 30px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 section {
@@ -25,16 +25,31 @@ h2 {
     margin-top: 0;
 }
 
+.form-group {
+    margin: 10px 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #333;
+}
+
 input, textarea, select {
     padding: 10px;
-    margin: 5px;
+    margin: 5px 0;
     border: 1px solid #ddd;
     border-radius: 4px;
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
 }
 
 textarea {
-    width: 90%;
+    width: 100%;
+    max-width: 100%;
     font-family: Arial, sans-serif;
 }
 
@@ -52,6 +67,12 @@ button:hover {
     background: #0056b3;
 }
 
+button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 .item {
     display: flex;
     justify-content: space-between;
@@ -66,6 +87,7 @@ button:hover {
 .item button {
     background: #dc3545;
     padding: 5px 15px;
+    flex-shrink: 0;
 }
 
 .item button:hover {
@@ -85,6 +107,9 @@ button:hover {
 
 .todo.completed {
     opacity: 0.6;
+}
+
+.todo.completed span {
     text-decoration: line-through;
 }
 
@@ -102,13 +127,124 @@ button:hover {
     background: white;
     border-radius: 4px;
     border: 1px solid #ddd;
+    position: relative;
 }
 
 .note h3 {
     margin: 0 0 10px 0;
 }
 
+.note button {
+    background: #dc3545;
+    padding: 5px 15px;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.note button:hover {
+    background: #c82333;
+}
+
 #result, #items, #searchResults {
     margin-top: 15px;
     white-space: pre-wrap;
+}
+
+/* Loading state */
+.loading {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    max-width: 350px;
+    word-wrap: break-word;
+}
+
+.toast-error {
+    background: #dc3545;
+}
+
+.toast-success {
+    background: #28a745;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Screen reader only utility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Filter controls inline layout */
+.filter-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+    flex-wrap: wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    section {
+        padding: 15px;
+    }
+
+    input, select {
+        max-width: 100%;
+    }
+
+    .item, .todo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .item button, .todo button {
+        align-self: flex-end;
+    }
+
+    .toast {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
 }
