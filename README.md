@@ -58,15 +58,16 @@ A full-stack web application built with Flask backend and vanilla JavaScript fro
 - Files saved to `uploads/` directory
 - Returns file information (name, size)
 - Unique filenames with timestamps to prevent overwrites
+- **Note:** Validation is by file **extension only** — file contents/MIME type are not inspected
 
 ### 8. Security Features
 - **XSS Protection**: All user input is escaped before display
 - **Input Validation**: Backend validation for all endpoints
 - **JSON Validation**: All POST endpoints validate JSON payloads
 - **Error Handling**: Try-catch blocks for API calls
-- **File Type Restrictions**: Only allowed extensions accepted
+- **File Type Restrictions**: Only allowed extensions accepted (extension-based, not content-based)
 - **Length Limits**: Maximum character limits enforced
-- **CORS Support**: Cross-origin resource sharing enabled
+- **CORS**: Restricted to configurable origins via `FLASK_CORS_ORIGINS` (defaults to local dev only)
 
 ### 9. Data Export
 - Export all data (items, todos, notes, users) as JSON
@@ -88,6 +89,11 @@ python app.py
 ```
 
 Visit `http://localhost:5000` in your browser.
+
+### Environment variables
+
+- `FLASK_DEBUG` - Set to `true` to enable debug mode (default: `false`; never enable in production)
+- `FLASK_CORS_ORIGINS` - Comma-separated list of allowed CORS origins (default: `http://localhost:5000,http://127.0.0.1:5000`)
 
 ## API Endpoints
 
@@ -154,6 +160,8 @@ Response includes:
 - `per_page` - Items per page
 - `pages` - Total pages
 
+The frontend renders Prev/Next controls (50 items per page) so all items are reachable, not just the first page.
+
 ## Filtering
 
 Todos can be filtered by:
@@ -204,9 +212,9 @@ python-flask-backend-frontend/
 - **XSS Prevention**: HTML escaping for all user-generated content
 - **Input Validation**: Server-side validation for all inputs
 - **JSON Validation**: All POST endpoints validate JSON payloads
-- **File Upload Security**: Filename sanitization, type restrictions, unique naming
+- **File Upload Security**: Filename sanitization, unique naming, and extension-based type restrictions (content/MIME not inspected)
 - **Error Handling**: Graceful error handling with user feedback
-- **CORS**: Enabled for cross-origin API access
+- **CORS**: Restricted to configurable origins via `FLASK_CORS_ORIGINS` (defaults to local dev only)
 - **Pagination Limits**: Max 100 items per page to prevent abuse
 
 ## Notes
@@ -215,7 +223,7 @@ python-flask-backend-frontend/
 - All data is stored in-memory and will be lost when the server restarts
 - File uploads are limited to 16MB
 - Uploaded files get unique timestamps to prevent overwrites
-- Server runs in debug mode by default (disable for production)
+- Debug mode is **off by default**; enable it by setting `FLASK_DEBUG=true` (never enable in production)
 - All user input is validated and sanitized
-- CORS is enabled for all routes
+- CORS is restricted to origins listed in `FLASK_CORS_ORIGINS` (defaults to `http://localhost:5000,http://127.0.0.1:5000`)
 - Uses Jinja2 templates for frontend rendering

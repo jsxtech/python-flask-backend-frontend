@@ -204,6 +204,19 @@ button:disabled {
     border: 0;
 }
 
+/* Pagination controls */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.pagination .page-info {
+    font-size: 0.9em;
+    color: #333;
+}
+
 /* Filter controls inline layout */
 .filter-controls {
     display: flex;
