@@ -35,6 +35,10 @@ function setButtonLoading(button, loading) {
 // State: track current items sort order so deletes preserve it
 let currentSortOrder = null;
 
+// State: current items page so pagination + deletes stay on the same page
+let currentItemsPage = 1;
+const ITEMS_PER_PAGE = 50;
+
 // State: abort controller for todo operations to prevent races
 let todoAbortController = null;
 
@@ -72,28 +76,47 @@ async function sendData() {
     }
 }
 
-async function loadItems() {
+async function loadItems(page = currentItemsPage) {
     try {
         setLoading('items', true);
+        currentItemsPage = page < 1 ? 1 : page;
         // If a sort order is active, fetch sorted; otherwise fetch default order
-        let url = '/api/items?page=1&per_page=50';
+        let url = `/api/items?page=${currentItemsPage}&per_page=${ITEMS_PER_PAGE}`;
         if (currentSortOrder) {
-            url = `/api/items/sort?order=${currentSortOrder}&per_page=50`;
+            url = `/api/items/sort?order=${currentSortOrder}&page=${currentItemsPage}&per_page=${ITEMS_PER_PAGE}`;
         }
         const response = await fetch(url);
         const data = await response.json();
+        // If a delete emptied the last page, step back to the final valid page.
+        if (data.pages && currentItemsPage > data.pages && currentItemsPage > 1) {
+            return loadItems(data.pages);
+        }
         const itemsDiv = document.getElementById('items');
-        itemsDiv.innerHTML = data.items.map(item =>
-            `<div class="item" role="listitem">
-                <span>${escapeHtml(item.text)}</span>
-                <button onclick="deleteItem(${item.id})" aria-label="${escapeAttr('Delete item: ' + item.text)}">Delete</button>
-            </div>`
-        ).join('');
+        itemsDiv.innerHTML = data.items.map(renderItem).join('');
+        renderItemsPagination(data);
     } catch (error) {
         showError('Failed to load items');
     } finally {
         setLoading('items', false);
     }
+}
+
+// Render Prev/Next pagination controls for the items list.
+function renderItemsPagination(data) {
+    const pager = document.getElementById('itemsPagination');
+    if (!pager) return;
+    const page = data.page || 1;
+    const pages = data.pages || 1;
+    if (pages <= 1) {
+        pager.innerHTML = '';
+        return;
+    }
+    const prevDisabled = page <= 1 ? 'disabled' : '';
+    const nextDisabled = page >= pages ? 'disabled' : '';
+    pager.innerHTML =
+        `<button onclick="loadItems(${page - 1})" ${prevDisabled} aria-label="Previous page">Prev</button>` +
+        `<span class="page-info">Page ${page} of ${pages}</span>` +
+        `<button onclick="loadItems(${page + 1})" ${nextDisabled} aria-label="Next page">Next</button>`;
 }
 
 async function addItem() {
@@ -165,7 +188,7 @@ async function clearAll() {
             return;
         }
         showSuccess('All items cleared');
-        loadItems();
+        loadItems(1);
     } catch (error) {
         showError('Failed to clear items');
     }
@@ -266,22 +289,8 @@ async function uploadFile() {
 async function sortItems() {
     const order = document.getElementById('sortOrder').value;
     currentSortOrder = order;
-    try {
-        setLoading('items', true);
-        const response = await fetch(`/api/items/sort?order=${order}&per_page=50`);
-        const data = await response.json();
-        const itemsDiv = document.getElementById('items');
-        itemsDiv.innerHTML = data.items.map(item =>
-            `<div class="item" role="listitem">
-                <span>${escapeHtml(item.text)}</span>
-                <button onclick="deleteItem(${item.id})" aria-label="${escapeAttr('Delete item: ' + item.text)}">Delete</button>
-            </div>`
-        ).join('');
-    } catch (error) {
-        showError('Failed to sort items');
-    } finally {
-        setLoading('items', false);
-    }
+    // Reset to first page when the sort order changes
+    await loadItems(1);
 }
 
 async function addTodo() {
@@ -330,15 +339,7 @@ async function loadTodos() {
         const response = await fetch('/api/todos', {signal: todoAbortController.signal});
         const data = await response.json();
         const todosDiv = document.getElementById('todos');
-        todosDiv.innerHTML = data.todos.map(todo =>
-            `<div class="todo ${todo.completed ? 'completed' : ''} ${todo.priority}" role="listitem">
-                <span>${escapeHtml(todo.text)} (${todo.priority})</span>
-                <div>
-                    <button onclick="toggleTodo(${todo.id})" aria-label="${escapeAttr((todo.completed ? 'Mark incomplete: ' : 'Mark complete: ') + todo.text)}">${todo.completed ? 'Undo' : 'Complete'}</button>
-                    <button onclick="deleteTodo(${todo.id})" aria-label="${escapeAttr('Delete todo: ' + todo.text)}">Delete</button>
-                </div>
-            </div>`
-        ).join('');
+        todosDiv.innerHTML = data.todos.map(renderTodo).join('');
     } catch (error) {
         if (error.name === 'AbortError') return;
         showError('Failed to load todos');
@@ -451,6 +452,25 @@ function escapeAttr(text) {
         .replace(/'/g, '&#39;');
 }
 
+// Render a single item row. Centralizes escaping so all callers stay consistent.
+function renderItem(item) {
+    return `<div class="item" role="listitem">
+                <span>${escapeHtml(item.text)}</span>
+                <button onclick="deleteItem(${item.id})" aria-label="${escapeAttr('Delete item: ' + item.text)}">Delete</button>
+            </div>`;
+}
+
+// Render a single todo row. Centralizes escaping so all callers stay consistent.
+function renderTodo(todo) {
+    return `<div class="todo ${todo.completed ? 'completed' : ''} ${todo.priority}" role="listitem">
+                <span>${escapeHtml(todo.text)} (${todo.priority})</span>
+                <div>
+                    <button onclick="toggleTodo(${todo.id})" aria-label="${escapeAttr((todo.completed ? 'Mark incomplete: ' : 'Mark complete: ') + todo.text)}">${todo.completed ? 'Undo' : 'Complete'}</button>
+                    <button onclick="deleteTodo(${todo.id})" aria-label="${escapeAttr('Delete todo: ' + todo.text)}">Delete</button>
+                </div>
+            </div>`;
+}
+
 function showError(message) {
     showToast(message, 'error');
 }
@@ -492,15 +512,7 @@ async function filterTodos() {
             return;
         }
         const todosDiv = document.getElementById('todos');
-        todosDiv.innerHTML = data.todos.map(todo =>
-            `<div class="todo ${todo.completed ? 'completed' : ''} ${todo.priority}" role="listitem">
-                <span>${escapeHtml(todo.text)} (${todo.priority})</span>
-                <div>
-                    <button onclick="toggleTodo(${todo.id})" aria-label="${escapeAttr((todo.completed ? 'Mark incomplete: ' : 'Mark complete: ') + todo.text)}">${todo.completed ? 'Undo' : 'Complete'}</button>
-                    <button onclick="deleteTodo(${todo.id})" aria-label="${escapeAttr('Delete todo: ' + todo.text)}">Delete</button>
-                </div>
-            </div>`
-        ).join('');
+        todosDiv.innerHTML = data.todos.map(renderTodo).join('');
     } catch (error) {
         if (error.name === 'AbortError') return; // Superseded by newer request
         showError('Failed to filter todos');
@@ -521,8 +533,12 @@ async function exportData() {
         let filename = `export_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
         const disposition = response.headers.get('Content-Disposition');
         if (disposition) {
-            const match = disposition.match(/filename=(.+)/);
-            if (match) filename = match[1];
+            // Match up to the next ';' and strip surrounding quotes/whitespace.
+            const match = disposition.match(/filename\*?=([^;]+)/i);
+            if (match) {
+                const parsed = match[1].trim().replace(/^"(.*)"$/, '$1');
+                if (parsed) filename = parsed;
+            }
         }
 
         const blob = await response.blob();
