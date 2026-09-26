@@ -10,7 +10,19 @@ import logging
 import threading
 
 app = Flask(__name__)
-CORS(app)
+
+# Restrict CORS to configurable origins instead of allowing all.
+# Set FLASK_CORS_ORIGINS to a comma-separated list of allowed origins.
+# Defaults to the local dev origin only.
+_cors_origins = [
+    origin.strip()
+    for origin in os.environ.get(
+        'FLASK_CORS_ORIGINS', 'http://localhost:5000,http://127.0.0.1:5000'
+    ).split(',')
+    if origin.strip()
+]
+CORS(app, origins=_cors_origins)
+
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
 
