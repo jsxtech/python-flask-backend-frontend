@@ -2,7 +2,6 @@ from flask import Flask, render_template, jsonify, request, make_response
 from flask_cors import CORS
 from datetime import datetime
 from werkzeug.utils import secure_filename
-from werkzeug.exceptions import RequestEntityTooLarge
 import os
 import re
 import time
@@ -54,6 +53,18 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
 @app.errorhandler(413)
 def request_entity_too_large(error):
     return jsonify({'error': 'File too large. Maximum size is 16MB'}), 413
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    # Ensures malformed JSON bodies (and other 400s) return JSON, not HTML,
+    # so the frontend's response.json() error handling always works.
+    return jsonify({'error': 'Bad request'}), 400
+
+
+@app.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({'error': 'Method not allowed'}), 405
 
 
 @app.errorhandler(404)
