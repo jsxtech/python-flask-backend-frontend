@@ -19,19 +19,6 @@ function setLoading(elementId, loading) {
     }
 }
 
-// Utility: disable/enable a button during an operation
-function setButtonLoading(button, loading) {
-    if (!button) return;
-    button.disabled = loading;
-    if (loading) {
-        button.dataset.originalText = button.textContent;
-        button.textContent = 'Loading...';
-    } else if (button.dataset.originalText) {
-        button.textContent = button.dataset.originalText;
-        delete button.dataset.originalText;
-    }
-}
-
 // State: track current items sort order so deletes preserve it
 let currentSortOrder = null;
 
